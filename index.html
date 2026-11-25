@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Declarative Programming Part 1 – Year 13 Pre-learning | CIE 9618</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;}
+body{margin:0;padding:0;background:#f5f5f5;font-family:'Lato',sans-serif;font-size:14pt;color:#333333;line-height:1.65;}
+
+.opt{display:block;font-family:'Lato',sans-serif;font-size:14pt;padding:11px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#ffffff;color:#333333;cursor:pointer;margin-bottom:10px;line-height:1.4;user-select:none;-webkit-user-select:none;transition:background 0.12s,border-color 0.12s;}
+.opt:hover{background:#e3f2fd;border-color:#007BA6;}
+.opt.selected{background:#e3f2fd;border-color:#007BA6;font-weight:700;}
+.opt.correct{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;font-weight:700;pointer-events:none;cursor:default;}
+.opt.wrong{background:#ffebee!important;border-color:#C62828!important;color:#7f0000!important;pointer-events:none;cursor:default;}
+.opt.reveal{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;font-weight:700;pointer-events:none;cursor:default;}
+.opt.locked{pointer-events:none;cursor:default;}
+
+.wopt{display:inline-block;font-family:'Courier New',Courier,monospace;font-size:13pt;font-weight:700;padding:8px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#ffffff;color:#333333;cursor:pointer;margin:4px 6px 4px 0;line-height:1.4;user-select:none;-webkit-user-select:none;transition:background 0.12s,border-color 0.12s;}
+.wopt:hover{background:#e3f2fd;border-color:#007BA6;}
+.wopt.selected{background:#e3f2fd;border-color:#007BA6;color:#007BA6;}
+.wopt.correct{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;pointer-events:none;}
+.wopt.wrong{background:#ffebee!important;border-color:#C62828!important;color:#7f0000!important;pointer-events:none;}
+.wopt.reveal{background:#e8f5e9!important;border-color:#388e3c!important;color:#1b5e20!important;pointer-events:none;}
+.wopt.locked{pointer-events:none;}
+
+.fb{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:14px;}
+.fb-ok{background:#e8f5e9;color:#1b5e20;border:1px solid #81c784;}
+.fb-bad{background:#ffebee;color:#7f0000;border:1px solid #ef9a9a;}
+
+.tf-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:10px;padding:12px 16px;background:#fff;border:1px solid #d0d0d0;border-radius:6px;}
+.tf-stmt{flex:1;font-family:'Lato',sans-serif;font-size:14pt;color:#333;line-height:1.5;}
+.tf-btns{display:flex;gap:8px;flex-shrink:0;margin-top:2px;}
+.tf-btn{font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 18px;border:2px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;cursor:pointer;}
+.tf-btn:hover{background:#e3f2fd;border-color:#007BA6;}
+.tf-btn.ok{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;pointer-events:none;}
+.tf-btn.bad{background:#ffebee;border-color:#C62828;color:#7f0000;pointer-events:none;}
+.tf-btn.show{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;pointer-events:none;}
+.tf-row.done .tf-btn{pointer-events:none;}
+.tf-row{flex-wrap:wrap;}
+.tf-row > div:not(.tf-stmt):not(.tf-btns){flex-basis:100%;}
+
+.match-row{display:grid;grid-template-columns:200px 1fr;gap:8px;margin-bottom:8px;align-items:center;}
+.match-term{font-family:'Courier New',monospace;font-size:13pt;font-weight:700;padding:9px 12px;background:#1e1e2e;border-radius:6px;color:#a6e3a1;text-align:center;line-height:1.4;}
+.match-sel{font-family:'Lato',sans-serif;font-size:13pt;padding:9px 12px;border:2px solid #d0d0d0;border-radius:6px;background:#fff;color:#333;width:100%;cursor:pointer;}
+.match-sel:focus{outline:none;border-color:#007BA6;}
+.match-row.ok .match-sel{background:#e8f5e9;border-color:#388e3c;color:#1b5e20;}
+.match-row.bad .match-sel{background:#ffebee;border-color:#C62828;color:#7f0000;}
+.match-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:8px 22px;border:2px solid #007BA6;border-radius:6px;background:#007BA6;color:#fff;cursor:pointer;margin-top:12px;}
+.match-btn:hover{background:#005f80;}
+.match-btn:disabled{background:#b3d4e8;border-color:#b3d4e8;cursor:default;}
+.match-result{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:12px;}
+
+.drag-bank{display:flex;flex-wrap:wrap;gap:8px;padding:14px;background:#f0f8ff;border:2px dashed #b3d4e8;border-radius:6px;min-height:52px;margin-bottom:12px;}
+.drag-chip{font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 16px;border:2px solid #007BA6;border-radius:6px;background:#e3f2fd;color:#007BA6;cursor:grab;white-space:nowrap;user-select:none;-webkit-user-select:none;}
+.drag-chip:active{cursor:grabbing;opacity:0.7;}
+.drag-chip.locked{cursor:default;pointer-events:none;opacity:0.75;}
+.drop-zone{display:inline-flex;align-items:center;justify-content:center;min-width:130px;padding:4px 8px;border-bottom:3px solid #007BA6;background:#fafafa;font-family:'Lato',sans-serif;font-size:12pt;color:#C62828;font-weight:700;vertical-align:middle;text-align:center;min-height:28px;}
+.drop-zone.drag-over{background:#e3f2fd;border-bottom-color:#C62828;}
+.sort-zone{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:6px;min-height:76px;}
+.check-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:8px 22px;border:2px solid #007BA6;border-radius:6px;background:#007BA6;color:#fff;cursor:pointer;margin-top:12px;}
+.check-btn:hover{background:#005f80;}
+.check-btn:disabled{background:#b3d4e8;border-color:#b3d4e8;cursor:default;}
+.drag-result{display:none;font-family:'Lato',sans-serif;font-size:14pt;line-height:1.65;padding:14px 18px;border-radius:6px;margin-top:12px;}
+
+code{font-family:'Courier New',monospace;background:#f0f0f0;padding:1px 6px;border-radius:3px;font-size:13pt;}
+.cx-tbl{border-collapse:collapse;width:100%;font-size:13pt;}
+.cx-tbl th{background:#007BA6;color:#fff;padding:9px 14px;border:1px solid #005f80;text-align:center;}
+.cx-tbl td{border:1px solid #d0d0d0;padding:8px 14px;text-align:left;vertical-align:top;}
+.cx-tbl tr:nth-child(even) td{background:#f0f8ff;}
+.code{margin:0;background:#1e1e2e;border-radius:8px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12pt;line-height:1.85;color:#cdd6f4;white-space:pre;overflow-x:auto;}
+.code-lbl{font-size:11pt;font-weight:700;color:#6c7086;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;font-family:'Lato',sans-serif;white-space:normal;}
+.k{color:#f38ba8;}.v{color:#fab387;}.f{color:#a6e3a1;}.cm{color:#6c7086;}.s{color:#f9e2af;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.rec{display:flex;gap:4px;margin-bottom:4px;font-family:'Courier New',monospace;font-size:11pt;}
+.rec span{background:#fff;border:1px solid #b3d4e8;border-radius:3px;padding:2px 6px;}
+.rec span.key{background:#fff3e0;border-color:#e65100;font-weight:700;color:#e65100;}
+.rec span.addr{background:#1e1e2e;color:#fab387;border-color:#1e1e2e;min-width:34px;text-align:center;}
+.rec span.empty{color:#aaa;font-style:italic;}
+.slot-line{font-family:'Courier New',monospace;font-size:12pt;color:#cdd6f4;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.slot-line .ln{color:#6c7086;min-width:22px;text-align:right;}
+.drop-zone .drag-chip{white-space:normal;}
+.g2w{grid-template-columns:1.2fr 1fr;}
+@media (max-width:720px){
+  .g2,.g3,.g2w{grid-template-columns:1fr;}
+  .match-row{grid-template-columns:1fr;}
+  .tf-row{flex-direction:column;}
+}
+.cls{border:2px solid #007BA6;border-radius:6px;background:#fff;font-family:'Courier New',monospace;font-size:12pt;overflow:hidden;}
+.cls-h{background:#007BA6;color:#fff;font-weight:700;text-align:center;padding:6px 10px;font-family:'Lato',sans-serif;font-size:13pt;}
+.cls-s{padding:6px 12px;border-top:1px solid #b3d4e8;line-height:1.7;}
+.priv{color:#C62828;font-weight:700;}.pub{color:#1b5e20;font-weight:700;}
+.term{font-weight:700;color:#007BA6;}
+.g2>*,.g3>*{min-width:0;}
+
+.exq{background:#fffdf5;border:2px solid #e65100;border-radius:8px;padding:16px 20px;margin-bottom:14px;}
+.exq-lbl{font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#e65100;margin-bottom:8px;}
+.exq-q{font-size:14pt;font-weight:700;color:#333;line-height:1.5;margin-bottom:10px;}
+.exq-mk{color:#e65100;font-weight:700;white-space:nowrap;}
+.ans-btn{display:inline-block;font-family:'Lato',sans-serif;font-size:12pt;font-weight:700;padding:7px 18px;border:2px solid #e65100;border-radius:6px;background:#fff;color:#e65100;cursor:pointer;}
+.ans-btn:hover{background:#fff3e0;}
+.ans{display:none;margin-top:12px;background:#fff3e0;border-radius:6px;padding:12px 16px;font-size:13pt;line-height:1.7;}
+.ans ul{margin:4px 0 0;padding-left:1.2em;}
+.recap{border-left:4px solid #00796B;background:#e0f2f1;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;font-size:13.5pt;}
+.recap strong.h{color:#00796B;}
+
+.kb-tbl{border-collapse:collapse;width:100%;font-size:13pt;}
+.kb-tbl th{background:#007BA6;color:#fff;padding:7px 10px;text-align:left;border:1px solid #005f80;}
+.kb-tbl td{border:1px solid #cfd8dc;padding:7px 10px;vertical-align:top;background:#fff;}
+.trace td.ok{color:#2e7d32;font-weight:700;} .trace td.no{color:#c62828;font-weight:700;}
+.sort-zone .drag-chip{white-space:normal;line-height:1.35;}
+.ptr{display:inline-block;background:#fff3e0;border:1px solid #e65100;color:#e65100;font-weight:700;border-radius:4px;padding:2px 10px;font-family:'Courier New',monospace;font-size:12pt;margin:2px 6px 2px 0;}
+</style>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;">
+<div style="max-width:960px;margin:0 auto;padding:0 0 80px;">
+
+<!-- HEADER -->
+<div style="background:#007BA6;padding:32px 40px 28px;">
+  <div style="font-size:11pt;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;">CIE A-Level Computer Science 9618 &bull; Unit 4 &bull; Topic 20.1 Programming Paradigms</div>
+  <div style="font-size:24pt;font-weight:700;color:#ffffff;margin:0 0 6px;">Declarative Programming (Part 1): Writing Facts and Rules</div>
+  <div style="font-size:14pt;color:rgba(255,255,255,0.88);">Pre-learning &nbsp;|&nbsp; Year 13 Computer Science &nbsp;|&nbsp; Part 1 of 2</div>
+  <div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap;">
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 90 minutes</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 5 sections</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 21 interactive activities</span>
+    <span style="background:rgba(255,255,255,0.2);color:#fff;font-size:11pt;font-weight:700;padding:4px 14px;border-radius:20px;">&#9679; 4 worked exam questions</span>
+  </div>
+</div>
+
+<!-- CONTENTS -->
+<div style="background:#ffffff;border-bottom:1px solid #d0d0d0;padding:20px 40px;">
+  <div style="font-size:12pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">Contents</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>What is Declarative Programming?</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>Writing Facts</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>Writing Rules with IF</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>Rules with AND, NOT and OR</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>Exam Practice: From Information to Facts and Rules</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12pt;"><div style="min-width:22px;height:22px;border-radius:50%;background:#007BA6;color:#fff;font-size:10pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">&#10003;</div>Summary</div>
+  </div>
+</div>
+
+<div style="padding:40px 40px 0;">
+
+<!-- ═══════════════════════════════════════════
+     SECTION 1 — WHAT IS DECLARATIVE PROGRAMMING?
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">What is Declarative Programming?</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~10 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;">Everything you have programmed so far has been <strong>imperative</strong>: you tell the computer <em>how</em> to solve a problem, step by step. In <strong>declarative programming</strong> you tell it <em>what</em> is true, as a set of <strong>facts</strong> and <strong>rules</strong>. You then ask a question (a <strong>goal</strong>), and the language's <strong>inference engine</strong> works out the answer for you. The best-known declarative language is Prolog.</p>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div>
+        <div class="code" style=""><div class="code-lbl">Imperative</div><span class="cm"># Imperative: HOW to find them</span>
+<span class="k">for</span> Animal <span class="k">in</span> Animals:
+    <span class="k">if</span> Food[Animal] == <span class="s">"meat"</span>:
+        <span class="f">print</span>(Animal)</div>
+      </div>
+      <div>
+        <div class="code" style=""><div class="code-lbl">Declarative</div><span class="cm">// Declarative: WHAT is true</span>
+<span class="f">carnivore</span>(<span class="v">X</span>) <span class="k">IF</span> <span class="f">eats</span>(<span class="v">X</span>, meat).
+
+<span class="cm">// Goal (question)</span>
+<span class="f">carnivore</span>(<span class="v">X</span>)</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:16px;">
+      <table class="cx-tbl">
+        <tr><th style="width:22%;">Term</th><th>Meaning</th><th style="width:34%;">Example</th></tr>
+        <tr><td><span class="term">Fact</span></td><td>Something that is unconditionally true</td><td><code>type(lion, mammal).</code></td></tr>
+        <tr><td><span class="term">Rule</span></td><td>Something that is true <em>if</em> its conditions are true</td><td><code>carnivore(X) IF eats(X, meat).</code></td></tr>
+        <tr><td><span class="term">Knowledge base</span></td><td>The full set of facts and rules for a problem</td><td>Clauses 01 to 17 below</td></tr>
+        <tr><td><span class="term">Predicate</span></td><td>The name of a fact or rule, describing a property or a relationship</td><td><code>type</code>, <code>eats</code>, <code>carnivore</code></td></tr>
+        <tr><td><span class="term">Goal</span> (query)</td><td>A question the inference engine tries to satisfy using the knowledge base</td><td><code>carnivore(X)</code></td></tr>
+      </table>
+    </div>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">This page and the next:</strong> this pre-learning is about <strong>writing</strong> facts and rules from information you are given. Part 2 is about <strong>writing goals</strong> and working out how the inference engine satisfies them.</div>
+    <div style="border-left:4px solid #007BA6;background:#e3f2fd;padding:12px 16px;border-radius:0 6px 6px 0;"><strong style="color:#007BA6;">CIE 9618 Specification (20.1):</strong> understanding of and ability to solve a problem by writing appropriate facts and rules based on supplied information.</div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8644; Activity 1 — Sort: imperative or declarative?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag each statement into the paradigm it describes.</div>
+    <div class="drag-bank" id="bank1">
+      <div class="drag-chip" draggable="true">States facts and rules about a problem</div>
+      <div class="drag-chip" draggable="true">Uses loops and assignment statements</div>
+      <div class="drag-chip" draggable="true">The inference engine works out how to find the answer</div>
+      <div class="drag-chip" draggable="true">Gives the computer step-by-step instructions</div>
+      <div class="drag-chip" draggable="true">Answers are found by asking a goal</div>
+      <div class="drag-chip" draggable="true">The programmer controls the order of execution</div>
+    </div>
+    <div class="g2" style="margin-bottom:12px;">
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Imperative</div>
+        <div id="sort1-0" class="sort-zone drag-bank" style="border-color:#007BA6;background:#f0f8ff;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#e65100;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Declarative</div>
+        <div id="sort1-1" class="sort-zone drag-bank" style="border-color:#e65100;background:#fffaf3;min-height:110px;flex-direction:column;"></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn1" onclick="checkSort1()">&#10003; Check my sort</button>
+    <div class="drag-result" id="res1"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 2 — Match the term to its meaning</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Use the dropdowns to match each term to its meaning.</div>
+    <div id="match1">
+      <div class="match-row"><div class="match-term">Fact</div><select class="match-sel" data-ans="fact"><option value="">— choose —</option><option value="rule">True only if its conditions are true</option><option value="kb">All the facts and rules for a problem</option><option value="fact">Something that is always true</option><option value="pred">The name of a fact or rule, e.g. eats</option><option value="goal">A question the system tries to satisfy</option></select></div>
+      <div class="match-row"><div class="match-term">Rule</div><select class="match-sel" data-ans="rule"><option value="">— choose —</option><option value="rule">True only if its conditions are true</option><option value="kb">All the facts and rules for a problem</option><option value="fact">Something that is always true</option><option value="pred">The name of a fact or rule, e.g. eats</option><option value="goal">A question the system tries to satisfy</option></select></div>
+      <div class="match-row"><div class="match-term">Goal</div><select class="match-sel" data-ans="goal"><option value="">— choose —</option><option value="rule">True only if its conditions are true</option><option value="kb">All the facts and rules for a problem</option><option value="fact">Something that is always true</option><option value="pred">The name of a fact or rule, e.g. eats</option><option value="goal">A question the system tries to satisfy</option></select></div>
+      <div class="match-row"><div class="match-term">Knowledge base</div><select class="match-sel" data-ans="kb"><option value="">— choose —</option><option value="rule">True only if its conditions are true</option><option value="kb">All the facts and rules for a problem</option><option value="fact">Something that is always true</option><option value="pred">The name of a fact or rule, e.g. eats</option><option value="goal">A question the system tries to satisfy</option></select></div>
+      <div class="match-row"><div class="match-term">Predicate</div><select class="match-sel" data-ans="pred"><option value="">— choose —</option><option value="rule">True only if its conditions are true</option><option value="kb">All the facts and rules for a problem</option><option value="fact">Something that is always true</option><option value="pred">The name of a fact or rule, e.g. eats</option><option value="goal">A question the system tries to satisfy</option></select></div>
+    </div>
+    <button class="match-btn" id="match1-btn" onclick="checkMatch1()">&#10003; Check my answers</button>
+    <div class="match-result" id="match1-res"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 3 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Which statement best describes the role of the <strong>inference engine</strong>?</div>
+    <div id="opts3">
+      <div class="opt" onclick="pickOpt(3,'a',this)">a) It converts the facts into Python code</div>
+      <div class="opt" onclick="pickOpt(3,'b',this)">b) It searches the knowledge base to find facts and rules that satisfy a goal</div>
+      <div class="opt" onclick="pickOpt(3,'c',this)">c) It stores the facts in alphabetical order</div>
+      <div class="opt" onclick="pickOpt(3,'d',this)">d) It checks the spelling of every predicate</div>
+    </div>
+    <div class="fb" id="fb3"></div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 2 — WRITING FACTS
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Writing Facts</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> A <strong>fact</strong> is written as a predicate followed by its arguments in brackets, and ends with a full stop. In exam questions each clause has a line number (01, 02…) so you can refer to it; the numbers are not part of the code.</div>
+    <div style="font-size:13pt;font-weight:700;color:#007BA6;margin-bottom:10px;">The scenario used in Sections 2 to 4</div>
+    <div style="border:2px dashed #007BA6;background:#f0f8ff;border-radius:6px;padding:14px 18px;margin-bottom:16px;font-size:13.5pt;">
+      A wildlife park keeps a <u>lion</u>, a <u>penguin</u>, an <u>eagle</u>, a <u>shark</u> and a <u>bat</u>. Lions and bats are mammals, penguins and eagles are birds, and sharks are fish. Lions and eagles eat meat, penguins and sharks eat fish, and bats eat insects. Eagles and bats can fly.
+    </div>
+    <div class="g2" style="margin-bottom:16px;align-items:start;">
+      <div class="code" style="font-size:11.5pt;"><div class="code-lbl">The wildlife park knowledge base</div><span class="cm">01 </span><span class="f">animal</span>(lion).
+<span class="cm">02 </span><span class="f">animal</span>(penguin).
+<span class="cm">03 </span><span class="f">animal</span>(eagle).
+<span class="cm">04 </span><span class="f">animal</span>(shark).
+<span class="cm">05 </span><span class="f">animal</span>(bat).
+<span class="cm">06 </span><span class="f">type</span>(lion, mammal).
+<span class="cm">07 </span><span class="f">type</span>(penguin, bird).
+<span class="cm">08 </span><span class="f">type</span>(eagle, bird).
+<span class="cm">09 </span><span class="f">type</span>(shark, fish).
+<span class="cm">10 </span><span class="f">type</span>(bat, mammal).
+<span class="cm">11 </span><span class="f">eats</span>(lion, meat).
+<span class="cm">12 </span><span class="f">eats</span>(penguin, fish).
+<span class="cm">13 </span><span class="f">eats</span>(eagle, meat).
+<span class="cm">14 </span><span class="f">eats</span>(shark, fish).
+<span class="cm">15 </span><span class="f">eats</span>(bat, insects).
+<span class="cm">16 </span><span class="f">canfly</span>(eagle).
+<span class="cm">17 </span><span class="f">canfly</span>(bat).</div>
+      <div>
+        <table class="kb-tbl" style="margin-bottom:12px;">
+          <tr><th>Rule for writing facts</th><th>Example</th></tr>
+          <tr><td>Predicate name in <strong>lower case</strong></td><td><code>eats</code></td></tr>
+          <tr><td>Arguments in <strong>brackets</strong>, separated by commas</td><td><code>(lion, meat)</code></td></tr>
+          <tr><td>Constants (actual things) in <strong>lower case</strong></td><td><code>lion</code>, <code>meat</code></td></tr>
+          <tr><td>End with a <strong>full stop</strong></td><td><code>eats(lion, meat).</code></td></tr>
+          <tr><td>Keep the <strong>argument order</strong> the same every time</td><td>always <code>eats(Animal, Food)</code></td></tr>
+        </table>
+            <div style="border-left:4px solid #e65100;background:#fff3e0;padding:12px 16px;border-radius:0 6px 6px 0;"><strong style="color:#e65100;">Only write what is true:</strong> there is no fact saying a lion cannot fly. Anything not in the knowledge base is treated as false, so you never need "negative" facts.</div>
+      </div>
+    </div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">The park buys a parrot. A parrot is a bird. It eats seeds and it can fly. Write the facts that need to be added to the knowledge base. <span class="exq-mk">[4]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(1,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans1"><strong>Mark scheme — one mark for each point:</strong><ul><li><code>animal(parrot).</code></li><li><code>type(parrot, bird).</code></li><li><code>eats(parrot, seeds).</code></li><li><code>canfly(parrot).</code></li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Copy the predicate names and the argument order from the existing knowledge base exactly. <code>type(bird, parrot).</code> would get no mark.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 4 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">The park adds the predicate <code>habitat(Animal, Place)</code>. Which fact correctly records that the shark lives in the sea?</div>
+    <div id="opts4">
+      <div class="opt" onclick="pickOpt(4,'a',this)">a) habitat(shark, sea).</div>
+      <div class="opt" onclick="pickOpt(4,'b',this)">b) Habitat(Shark, Sea).</div>
+      <div class="opt" onclick="pickOpt(4,'c',this)">c) habitat(shark, sea)</div>
+      <div class="opt" onclick="pickOpt(4,'d',this)">d) habitat(sea, shark).</div>
+    </div>
+    <div class="fb" id="fb4"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 5 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Every fact and every rule in the knowledge base must end with <span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span>.</div>
+    <div id="opts5w">
+      <span class="wopt" onclick="pickWopt(5,'a',this)">a semicolon ;</span>
+      <span class="wopt" onclick="pickWopt(5,'b',this)">a full stop .</span>
+      <span class="wopt" onclick="pickWopt(5,'c',this)">a comma ,</span>
+      <span class="wopt" onclick="pickWopt(5,'d',this)">nothing</span>
+    </div>
+    <div class="fb" id="fb5"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 6 — Write the facts</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">The park buys a giraffe. A giraffe is a mammal. It eats leaves. It cannot fly. Drag the correct facts into clauses 18 to 20. Three chips are not needed.</div>
+    <div class="drag-bank" id="bank6">
+      <div class="drag-chip" draggable="true">type(giraffe, mammal).</div>
+      <div class="drag-chip" draggable="true">canfly(giraffe).</div>
+      <div class="drag-chip" draggable="true">animal(giraffe).</div>
+      <div class="drag-chip" draggable="true">type(mammal, giraffe).</div>
+      <div class="drag-chip" draggable="true">eats(giraffe, leaves).</div>
+      <div class="drag-chip" draggable="true">Eats(giraffe, leaves).</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      <span style="color:#6c7086;">18</span>&nbsp;&nbsp;<span id="dz6a" class="drop-zone" style="min-width:260px;">?</span><br>
+      <span style="color:#6c7086;">19</span>&nbsp;&nbsp;<span id="dz6b" class="drop-zone" style="min-width:260px;">?</span><br>
+      <span style="color:#6c7086;">20</span>&nbsp;&nbsp;<span id="dz6c" class="drop-zone" style="min-width:260px;">?</span>
+    </div>
+    <button class="check-btn" id="btn6" onclick="checkDrop6()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res6"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 7 — Spot the error</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Each fact has one mistake. Choose what is wrong with it.</div>
+    <div id="match2">
+      <div class="match-row"><div class="match-term">Type(lion, mammal).</div><select class="match-sel" data-ans="pred"><option value="">— choose —</option><option value="order">The arguments are in the wrong order</option><option value="brack">The arguments must be in brackets</option><option value="pred">The predicate must start with a lower-case letter</option><option value="const">A capital letter makes this a variable, not a constant</option><option value="stop">It is missing a full stop</option></select></div>
+      <div class="match-row"><div class="match-term">eats(lion, meat)</div><select class="match-sel" data-ans="stop"><option value="">— choose —</option><option value="order">The arguments are in the wrong order</option><option value="brack">The arguments must be in brackets</option><option value="pred">The predicate must start with a lower-case letter</option><option value="const">A capital letter makes this a variable, not a constant</option><option value="stop">It is missing a full stop</option></select></div>
+      <div class="match-row"><div class="match-term">eats(meat, bat).</div><select class="match-sel" data-ans="order"><option value="">— choose —</option><option value="order">The arguments are in the wrong order</option><option value="brack">The arguments must be in brackets</option><option value="pred">The predicate must start with a lower-case letter</option><option value="const">A capital letter makes this a variable, not a constant</option><option value="stop">It is missing a full stop</option></select></div>
+      <div class="match-row"><div class="match-term">animal(Zebra).</div><select class="match-sel" data-ans="const"><option value="">— choose —</option><option value="order">The arguments are in the wrong order</option><option value="brack">The arguments must be in brackets</option><option value="pred">The predicate must start with a lower-case letter</option><option value="const">A capital letter makes this a variable, not a constant</option><option value="stop">It is missing a full stop</option></select></div>
+      <div class="match-row"><div class="match-term">canfly eagle.</div><select class="match-sel" data-ans="brack"><option value="">— choose —</option><option value="order">The arguments are in the wrong order</option><option value="brack">The arguments must be in brackets</option><option value="pred">The predicate must start with a lower-case letter</option><option value="const">A capital letter makes this a variable, not a constant</option><option value="stop">It is missing a full stop</option></select></div>
+    </div>
+    <button class="match-btn" id="match2-btn" onclick="checkMatch2()">&#10003; Check my answers</button>
+    <div class="match-result" id="match2-res"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 8 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Click True or False for each statement about facts.</div>
+    <div class="tf-row" id="tf1">
+      <div class="tf-stmt">To show that a lion cannot fly, you must add the fact <code>cannotfly(lion).</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(1,true,false)">True</button><button class="tf-btn" onclick="doTF(1,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf2">
+      <div class="tf-stmt">The clause numbers 01, 02, 03… are only there so that exam questions can refer to each line.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(2,true,true)">True</button><button class="tf-btn" onclick="doTF(2,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf3">
+      <div class="tf-stmt"><code>eats(lion, meat).</code> and <code>eats(meat, lion).</code> mean the same thing.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(3,true,false)">True</button><button class="tf-btn" onclick="doTF(3,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf4">
+      <div class="tf-stmt">A predicate can have one argument, such as <code>animal(lion).</code>, or more than one, such as <code>type(lion, mammal).</code></div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(4,true,true)">True</button><button class="tf-btn" onclick="doTF(4,false,true)">False</button></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 3 — WRITING RULES WITH IF
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Writing Rules with IF</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> A <strong>rule</strong> says something is true <em>if</em> certain conditions are true. It has a <strong>head</strong> (the conclusion) before <code>IF</code> and a <strong>body</strong> (the conditions) after it. Rules use <strong>variables</strong>, which start with a <strong>capital letter</strong> and stand for "any value that makes this work".</div>
+    <div style="margin-bottom:16px;">
+      <div class="code" style=""><div class="code-lbl">A rule</div><span class="f">carnivore</span>(<span class="v">X</span>) <span class="k">IF</span> <span class="f">eats</span>(<span class="v">X</span>, meat).</div>
+    </div>
+    <div class="g2" style="margin-bottom:16px;">
+      <div style="background:#e3f2fd;border-radius:8px;padding:16px 18px;border-top:4px solid #007BA6;">
+        <div style="font-weight:700;color:#007BA6;font-size:15pt;margin-bottom:8px;">Read it in English</div>
+        <p style="margin:0;font-size:13pt;">"<strong>X is a carnivore if X eats meat.</strong>" X is a variable, so the rule works for <em>any</em> animal. Using the knowledge base, the lion and the eagle are carnivores.</p>
+      </div>
+      <div style="background:#e8f5e9;border-radius:8px;padding:16px 18px;border-top:4px solid #388e3c;">
+        <div style="font-weight:700;color:#388e3c;font-size:15pt;margin-bottom:8px;">Why use a rule?</div>
+        <p style="margin:0;font-size:13pt;">One rule replaces many facts. Add a new meat-eating animal and it automatically becomes a carnivore, without writing a new carnivore fact.</p>
+      </div>
+    </div>
+    <table class="kb-tbl" style="margin-bottom:16px;">
+      <tr><th style="width:30%;">Part</th><th>In <code>carnivore(X) IF eats(X, meat).</code></th></tr>
+      <tr><td>Head (conclusion)</td><td><code>carnivore(X)</code></td></tr>
+      <tr><td>Body (condition)</td><td><code>eats(X, meat)</code></td></tr>
+      <tr><td>Variable</td><td><code>X</code> (capital letter); <code>Animal</code> would work just as well</td></tr>
+      <tr><td>Constant</td><td><code>meat</code> (lower case: one specific value)</td></tr>
+    </table>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">Same name, same value:</strong> within one rule, every <code>X</code> stands for the same thing. In <code>carnivore(X) IF eats(X, meat).</code> the X that is a carnivore must be the X that eats meat.</div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Write a rule to show that an animal is a <code>fisheater</code> if it eats fish. <span class="exq-mk">[2]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(2,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans2"><strong>Mark scheme — one mark for each point:</strong><ul><li>Correct head: <code>fisheater(X)</code></li><li>Correct body: <code>IF eats(X, fish).</code> (same variable, argument order matching the knowledge base, full stop)</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Use a capital letter for the variable and lower case for <code>fish</code>, which is a constant.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 9 — Multiple choice</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Which sentence is the correct meaning of the rule <code>bird(X) IF type(X, bird).</code>?</div>
+    <div id="opts9">
+      <div class="opt" onclick="pickOpt(9,'a',this)">a) X is a bird if X has the type bird</div>
+      <div class="opt" onclick="pickOpt(9,'b',this)">b) Every animal is a bird</div>
+      <div class="opt" onclick="pickOpt(9,'c',this)">c) Type is a bird if X is a bird</div>
+      <div class="opt" onclick="pickOpt(9,'d',this)">d) X has the type bird if X is a bird</div>
+    </div>
+    <div class="fb" id="fb9"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 10 — Fill in the gap</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">In the rule <code>carnivore(X) IF eats(X, meat).</code>, <code>X</code> is a <span style="background:#1e1e2e;color:#fab387;font-family:'Courier New',monospace;padding:2px 10px;border-radius:4px;font-size:13pt;">&#9744;</span> and <code>meat</code> is a constant.</div>
+    <div id="opts10w">
+      <span class="wopt" onclick="pickWopt(10,'a',this)">constant</span>
+      <span class="wopt" onclick="pickWopt(10,'b',this)">variable</span>
+      <span class="wopt" onclick="pickWopt(10,'c',this)">predicate</span>
+      <span class="wopt" onclick="pickWopt(10,'d',this)">goal</span>
+    </div>
+    <div class="fb" id="fb10"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 11 — Write the rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Write a rule to show that an animal is an <code>insecteater</code> if it eats insects. Three chips are not needed.</div>
+    <div class="drag-bank" id="bank11">
+      <div class="drag-chip" draggable="true">IF</div>
+      <div class="drag-chip" draggable="true">eats(insects, X).</div>
+      <div class="drag-chip" draggable="true">insecteater(X)</div>
+      <div class="drag-chip" draggable="true">AND</div>
+      <div class="drag-chip" draggable="true">eats(X, insects).</div>
+      <div class="drag-chip" draggable="true">insecteater(x)</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      <span style="color:#6c7086;">18</span>&nbsp;&nbsp;<span id="dz11a" class="drop-zone" style="min-width:170px;">?</span> <span id="dz11b" class="drop-zone" style="min-width:60px;">?</span> <span id="dz11c" class="drop-zone" style="min-width:200px;">?</span>
+    </div>
+    <button class="check-btn" id="btn11" onclick="checkDrop11()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res11"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 12 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Click True or False for each statement about rules.</div>
+    <div class="tf-row" id="tf5">
+      <div class="tf-stmt">In a rule, the conclusion (head) is written before IF.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(5,true,true)">True</button><button class="tf-btn" onclick="doTF(5,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf6">
+      <div class="tf-stmt"><code>x</code> and <code>X</code> are both variables.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(6,true,false)">True</button><button class="tf-btn" onclick="doTF(6,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf7">
+      <div class="tf-stmt">A variable name must be a single letter.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(7,true,false)">True</button><button class="tf-btn" onclick="doTF(7,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf8">
+      <div class="tf-stmt">A rule means you do not need to write a separate fact for every animal it applies to.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(8,true,true)">True</button><button class="tf-btn" onclick="doTF(8,false,true)">False</button></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 4 — RULES WITH AND, NOT AND OR
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Rules with AND, NOT and OR</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <div class="recap"><strong class="h">Quick recap:</strong> A rule's body can have more than one condition. <code>AND</code> means every condition must be true for the <em>same</em> values of the variables. <code>NOT</code> means the condition must <em>not</em> be found in the knowledge base. Two rules with the same head work like <strong>OR</strong>: the head is true if either rule succeeds.</div>
+    <div style="margin-bottom:16px;">
+      <div class="code" style=""><div class="code-lbl">Rules with AND, NOT and OR (added to the wildlife park)</div><span class="cm">18 </span><span class="f">flyingmammal</span>(<span class="v">X</span>) <span class="k">IF</span> <span class="f">type</span>(<span class="v">X</span>, mammal) <span class="k">AND</span> <span class="f">canfly</span>(<span class="v">X</span>).
+<span class="cm">19 </span><span class="f">flightlessbird</span>(<span class="v">X</span>) <span class="k">IF</span> <span class="f">type</span>(<span class="v">X</span>, bird) <span class="k">AND</span> <span class="k">NOT</span> <span class="f">canfly</span>(<span class="v">X</span>).
+<span class="cm">20 </span><span class="f">dangerous</span>(<span class="v">X</span>) <span class="k">IF</span> <span class="f">eats</span>(<span class="v">X</span>, meat).
+<span class="cm">21 </span><span class="f">dangerous</span>(<span class="v">X</span>) <span class="k">IF</span> <span class="f">type</span>(<span class="v">X</span>, fish).</div>
+    </div>
+    <table class="kb-tbl" style="margin-bottom:16px;">
+      <tr><th style="width:24%;">Rule</th><th>In English</th><th style="width:26%;">Animals that satisfy it</th></tr>
+      <tr><td><code>flyingmammal</code></td><td>X is a mammal <strong>and</strong> X can fly</td><td>bat</td></tr>
+      <tr><td><code>flightlessbird</code></td><td>X is a bird <strong>and</strong> X <strong>cannot</strong> fly</td><td>penguin (the eagle can fly)</td></tr>
+      <tr><td><code>dangerous</code></td><td>X eats meat <strong>or</strong> X is a fish</td><td>lion, eagle, shark</td></tr>
+    </table>
+    <div style="border-left:4px solid #9966FF;background:#f3e5f5;padding:12px 16px;border-radius:0 6px 6px 0;margin-bottom:14px;"><strong style="color:#9966FF;">Linking two things with a shared variable:</strong> variables can connect conditions. <code>samefood(X, Y) IF eats(X, F) AND eats(Y, F).</code> means "X and Y eat the same food F". The two F's must be the same value.</div>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Write a rule to show that an animal is a <code>seabird</code> if it is a bird that eats fish. <span class="exq-mk">[3]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(3,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans3"><strong>Mark scheme — one mark for each point:</strong><ul><li>Head: <code>seabird(X) IF</code></li><li>First condition: <code>type(X, bird)</code></li><li>Joined by <code>AND</code> to <code>eats(X, fish).</code> (with the full stop)</li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> One mark per part is common. Even if you are unsure of the second condition, a correct head and first condition still score.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9654; Activity 13 — Match the English to the rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Choose the rule that matches each sentence.</div>
+    <div id="match3">
+      <div class="match-row"><div class="match-term">X is a predator if X eats meat</div><select class="match-sel" data-ans="pred"><option value="">— choose —</option><option value="hunt">hunter(X) IF type(X, mammal) AND eats(X, meat).</option><option value="grd">grounded(X) IF animal(X) AND NOT canfly(X).</option><option value="noisy">Two clauses: hazard(X) IF eats(X, meat). / hazard(X) IF type(X, fish).</option><option value="pred">predator(X) IF eats(X, meat).</option><option value="fly">flyer(X) IF type(X, bird) AND canfly(X).</option></select></div>
+      <div class="match-row"><div class="match-term">X is a flyer if X is a bird and X can fly</div><select class="match-sel" data-ans="fly"><option value="">— choose —</option><option value="hunt">hunter(X) IF type(X, mammal) AND eats(X, meat).</option><option value="grd">grounded(X) IF animal(X) AND NOT canfly(X).</option><option value="noisy">Two clauses: hazard(X) IF eats(X, meat). / hazard(X) IF type(X, fish).</option><option value="pred">predator(X) IF eats(X, meat).</option><option value="fly">flyer(X) IF type(X, bird) AND canfly(X).</option></select></div>
+      <div class="match-row"><div class="match-term">X is grounded if X is an animal and X cannot fly</div><select class="match-sel" data-ans="grd"><option value="">— choose —</option><option value="hunt">hunter(X) IF type(X, mammal) AND eats(X, meat).</option><option value="grd">grounded(X) IF animal(X) AND NOT canfly(X).</option><option value="noisy">Two clauses: hazard(X) IF eats(X, meat). / hazard(X) IF type(X, fish).</option><option value="pred">predator(X) IF eats(X, meat).</option><option value="fly">flyer(X) IF type(X, bird) AND canfly(X).</option></select></div>
+      <div class="match-row"><div class="match-term">X is a hunter if X is a mammal and X eats meat</div><select class="match-sel" data-ans="hunt"><option value="">— choose —</option><option value="hunt">hunter(X) IF type(X, mammal) AND eats(X, meat).</option><option value="grd">grounded(X) IF animal(X) AND NOT canfly(X).</option><option value="noisy">Two clauses: hazard(X) IF eats(X, meat). / hazard(X) IF type(X, fish).</option><option value="pred">predator(X) IF eats(X, meat).</option><option value="fly">flyer(X) IF type(X, bird) AND canfly(X).</option></select></div>
+      <div class="match-row"><div class="match-term">X is a hazard if X eats meat or X is a fish</div><select class="match-sel" data-ans="noisy"><option value="">— choose —</option><option value="hunt">hunter(X) IF type(X, mammal) AND eats(X, meat).</option><option value="grd">grounded(X) IF animal(X) AND NOT canfly(X).</option><option value="noisy">Two clauses: hazard(X) IF eats(X, meat). / hazard(X) IF type(X, fish).</option><option value="pred">predator(X) IF eats(X, meat).</option><option value="fly">flyer(X) IF type(X, bird) AND canfly(X).</option></select></div>
+    </div>
+    <button class="match-btn" id="match3-btn" onclick="checkMatch3()">&#10003; Check my answers</button>
+    <div class="match-result" id="match3-res"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 14 — Build the rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Build the rule: <em>"X is grounded if X is an animal and X cannot fly."</em> Two chips are not needed.</div>
+    <div class="drag-bank" id="bank14">
+      <div class="drag-chip" draggable="true">AND</div>
+      <div class="drag-chip" draggable="true">grounded(X)</div>
+      <div class="drag-chip" draggable="true">NOT canfly(X).</div>
+      <div class="drag-chip" draggable="true">IF</div>
+      <div class="drag-chip" draggable="true">animal(X)</div>
+      <div class="drag-chip" draggable="true">canfly(X).</div>
+      <div class="drag-chip" draggable="true">OR</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      <span style="color:#6c7086;">22</span>&nbsp;&nbsp;<span id="dz14a" class="drop-zone" style="min-width:140px;">?</span> <span id="dz14b" class="drop-zone" style="min-width:50px;">?</span> <span id="dz14c" class="drop-zone" style="min-width:110px;">?</span> <span id="dz14d" class="drop-zone" style="min-width:60px;">?</span> <span id="dz14e" class="drop-zone" style="min-width:160px;">?</span>
+    </div>
+    <button class="check-btn" id="btn14" onclick="checkDrop14()">&#10003; Check my rule</button>
+    <div class="drag-result" id="res14"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 15 — Multiple choice — apply the rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Using the wildlife park knowledge base, which animals satisfy <code>grounded(X) IF animal(X) AND NOT canfly(X).</code>?</div>
+    <div id="opts15">
+      <div class="opt" onclick="pickOpt(15,'a',this)">a) eagle, bat</div>
+      <div class="opt" onclick="pickOpt(15,'b',this)">b) lion, penguin, shark</div>
+      <div class="opt" onclick="pickOpt(15,'c',this)">c) penguin only</div>
+      <div class="opt" onclick="pickOpt(15,'d',this)">d) lion, penguin, eagle, shark, bat</div>
+    </div>
+    <div class="fb" id="fb15"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 16 — True or False?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Click True or False for each statement.</div>
+    <div class="tf-row" id="tf9">
+      <div class="tf-stmt">Two clauses with the same head, such as two dangerous(X) rules, work like OR.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(9,true,true)">True</button><button class="tf-btn" onclick="doTF(9,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf10">
+      <div class="tf-stmt"><code>NOT canfly(X)</code> succeeds when there is no canfly fact for X.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(10,true,true)">True</button><button class="tf-btn" onclick="doTF(10,false,true)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf11">
+      <div class="tf-stmt">In <code>type(X, mammal) AND canfly(X)</code>, the two X's can be different animals.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(11,true,false)">True</button><button class="tf-btn" onclick="doTF(11,false,false)">False</button></div>
+    </div>
+    <div class="tf-row" id="tf12">
+      <div class="tf-stmt">A rule can only have one condition after IF.</div>
+      <div class="tf-btns"><button class="tf-btn" onclick="doTF(12,true,false)">True</button><button class="tf-btn" onclick="doTF(12,false,false)">False</button></div>
+    </div>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════
+     SECTION 5 — EXAM PRACTICE
+══════════════════════════════════════════════ -->
+<div style="margin-bottom:48px;padding-bottom:48px;border-bottom:1px solid #d0d0d0;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid #007BA6;">
+    <div style="min-width:36px;height:36px;border-radius:50%;background:#007BA6;color:#fff;font-size:14pt;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+    <div style="font-size:18pt;font-weight:700;color:#007BA6;">Exam Practice: From Information to Facts and Rules</div>
+    <div style="margin-left:auto;font-size:10pt;font-weight:700;color:#007BA6;background:#e3f2fd;padding:4px 12px;border-radius:20px;white-space:nowrap;border:1px solid #b3d4e8;flex-shrink:0;">&#9679; ~20 minutes</div>
+  </div>
+  <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:20px 24px;margin-bottom:18px;">
+    <p style="margin:0 0 14px;">An exam question gives you information in English and asks you to write the facts and rules. Here is a new scenario. Follow the four steps below.</p>
+    <div style="border:2px dashed #007BA6;background:#f0f8ff;border-radius:6px;padding:14px 18px;margin-bottom:16px;font-size:13.5pt;">
+      <u>Asha</u> and <u>Ben</u> are students. The <u>chess</u> club meets on <u>Monday</u> and the <u>coding</u> club meets on <u>Tuesday</u>. Asha attends the chess club and the coding club. Ben attends the coding club. <strong>A student is busy on a day if they attend a club that meets on that day.</strong>
+    </div>
+    <table class="kb-tbl" style="margin-bottom:16px;">
+      <tr><th style="width:34%;">Step</th><th>For this scenario</th></tr>
+      <tr><td>1. Find the <strong>constants</strong> (things)</td><td>asha, ben, chess, coding, monday, tuesday</td></tr>
+      <tr><td>2. Choose <strong>predicates</strong> and fix the argument order</td><td><code>student(Student)</code>, <code>meets(Club, Day)</code>, <code>attends(Student, Club)</code></td></tr>
+      <tr><td>3. Write a <strong>fact</strong> for each true statement</td><td>Activity 18</td></tr>
+      <tr><td>4. Write a <strong>rule</strong> for each "if" statement</td><td>Activity 19</td></tr>
+    </table>
+    <div class="exq">
+      <div class="exq-lbl">&#9998; Worked exam-style question</div>
+      <div class="exq-q">Explain the difference between a <strong>fact</strong> and a <strong>rule</strong>. Use an example from the clubs scenario. <span class="exq-mk">[2]</span></div>
+      <div style="font-size:13pt;color:#555;margin-bottom:10px;">Think of your answer first, then reveal the mark scheme.</div>
+      <button class="ans-btn" onclick="toggleAns(4,this)">&#128065; Show model answer</button>
+      <div class="ans" id="ans4"><strong>Mark scheme — one mark for each point:</strong><ul><li>A fact is always true, e.g. <code>meets(chess, monday).</code></li><li>A rule is true only if its conditions are true, e.g. <code>busy(S, D) IF attends(S, C) AND meets(C, D).</code></li></ul><div style="margin-top:8px;"><strong style="color:#e65100;">Examiner tip:</strong> Each mark needs the description <em>and</em> an example from the scenario in the question.</div></div>
+    </div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#8644; Activity 17 — Sort: fact or rule?</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag each sentence from the scenario into the kind of clause it becomes.</div>
+    <div class="drag-bank" id="bank17">
+      <div class="drag-chip" draggable="true">Asha is a student</div>
+      <div class="drag-chip" draggable="true">A student is busy on a day if they attend a club that meets on that day</div>
+      <div class="drag-chip" draggable="true">Chess club meets on Monday</div>
+      <div class="drag-chip" draggable="true">A student is a member if they attend any club</div>
+      <div class="drag-chip" draggable="true">Ben attends coding club</div>
+    </div>
+    <div class="g2" style="margin-bottom:12px;">
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#007BA6;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Fact</div>
+        <div id="sort17-0" class="sort-zone drag-bank" style="border-color:#007BA6;background:#f0f8ff;min-height:110px;flex-direction:column;"></div>
+      </div>
+      <div>
+        <div style="font-size:13pt;font-weight:700;color:#e65100;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;text-align:center;">Rule</div>
+        <div id="sort17-1" class="sort-zone drag-bank" style="border-color:#e65100;background:#fffaf3;min-height:110px;flex-direction:column;"></div>
+      </div>
+    </div>
+    <button class="check-btn" id="btn17" onclick="checkSort17()">&#10003; Check my sort</button>
+    <div class="drag-result" id="res17"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 18 — Write the facts</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Complete the knowledge base for the clubs scenario. Three chips are not needed.</div>
+    <div class="drag-bank" id="bank18">
+      <div class="drag-chip" draggable="true">attends(asha, chess).</div>
+      <div class="drag-chip" draggable="true">meets(monday, chess).</div>
+      <div class="drag-chip" draggable="true">meets(chess, monday).</div>
+      <div class="drag-chip" draggable="true">attends(Asha, chess).</div>
+      <div class="drag-chip" draggable="true">attends(asha, coding).</div>
+      <div class="drag-chip" draggable="true">attend(asha, coding).</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      <span style="color:#6c7086;">01</span>&nbsp;&nbsp;<span class="f">student</span>(asha).<br>
+      <span style="color:#6c7086;">02</span>&nbsp;&nbsp;<span class="f">student</span>(ben).<br>
+      <span style="color:#6c7086;">03</span>&nbsp;&nbsp;<span id="dz18a" class="drop-zone" style="min-width:240px;">?</span><br>
+      <span style="color:#6c7086;">04</span>&nbsp;&nbsp;<span class="f">meets</span>(coding, tuesday).<br>
+      <span style="color:#6c7086;">05</span>&nbsp;&nbsp;<span id="dz18b" class="drop-zone" style="min-width:240px;">?</span><br>
+      <span style="color:#6c7086;">06</span>&nbsp;&nbsp;<span class="f">attends</span>(ben, coding).<br>
+      <span style="color:#6c7086;">07</span>&nbsp;&nbsp;<span id="dz18c" class="drop-zone" style="min-width:240px;">?</span>
+    </div>
+    <button class="check-btn" id="btn18" onclick="checkDrop18()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res18"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9707; Activity 19 — Write the rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Complete the rule: <em>"A student S is busy on day D if S attends a club C that meets on day D."</em> Three chips are not needed.</div>
+    <div class="drag-bank" id="bank19">
+      <div class="drag-chip" draggable="true">meets(C, D).</div>
+      <div class="drag-chip" draggable="true">attends(S, C)</div>
+      <div class="drag-chip" draggable="true">OR</div>
+      <div class="drag-chip" draggable="true">attends(C, S)</div>
+      <div class="drag-chip" draggable="true">AND</div>
+      <div class="drag-chip" draggable="true">meets(S, D).</div>
+    </div>
+    <div style="background:#1e1e2e;border-radius:6px;padding:16px 20px;font-family:'Courier New',monospace;font-size:12.5pt;line-height:2.8;color:#cdd6f4;overflow-x:auto;">
+      <span style="color:#6c7086;">08</span>&nbsp;&nbsp;<span class="f">busy</span>(<span class="v">S</span>, <span class="v">D</span>) <span class="k">IF</span> <span id="dz19a" class="drop-zone" style="min-width:150px;">?</span> <span id="dz19b" class="drop-zone" style="min-width:60px;">?</span> <span id="dz19c" class="drop-zone" style="min-width:150px;">?</span>
+    </div>
+    <button class="check-btn" id="btn19" onclick="checkDrop19()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res19"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;margin-bottom:18px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#10003; Activity 20 — Multiple choice — choose the rule</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Which rule correctly says <em>"a student is a member if they attend any club"</em>?</div>
+    <div id="opts20">
+      <div class="opt" onclick="pickOpt(20,'a',this)">a) member(S) IF attends(S, C).</div>
+      <div class="opt" onclick="pickOpt(20,'b',this)">b) member(S) IF attends(C, S).</div>
+      <div class="opt" onclick="pickOpt(20,'c',this)">c) member(s) IF attends(s, C).</div>
+      <div class="opt" onclick="pickOpt(20,'d',this)">d) member(S) IF student(S) AND NOT attends(S, C).</div>
+    </div>
+    <div class="fb" id="fb20"></div>
+  </div>
+  <div style="background:#fafafa;border:1px solid #d0d0d0;border-radius:6px;padding:18px 22px;">
+    <div style="font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#00796B;margin-bottom:10px;">&#9998; Activity 21 — Review: fill in the gaps</div>
+    <div style="font-size:14pt;font-weight:700;color:#333;margin-bottom:12px;line-height:1.5;">Drag a word into each gap to complete the summary. Two chips are not needed.</div>
+    <div class="drag-bank" id="bank21">
+      <div class="drag-chip" draggable="true">rule</div>
+      <div class="drag-chip" draggable="true">loop</div>
+      <div class="drag-chip" draggable="true">lower case</div>
+      <div class="drag-chip" draggable="true">full stop</div>
+      <div class="drag-chip" draggable="true">fact</div>
+      <div class="drag-chip" draggable="true">semicolon</div>
+      <div class="drag-chip" draggable="true">capital letter</div>
+      <div class="drag-chip" draggable="true">AND</div>
+    </div>
+    <div style="background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:16px 20px;font-size:14pt;line-height:2.6;">
+      A <span id="dz21a" class="drop-zone">?</span> is always true, while a <span id="dz21b" class="drop-zone">?</span> is only true if its conditions are true. Predicates and constants start with a <span id="dz21c" class="drop-zone">?</span> letter, and variables start with a <span id="dz21d" class="drop-zone">?</span>. Conditions are joined with <span id="dz21e" class="drop-zone">?</span>, and every clause ends with a <span id="dz21f" class="drop-zone">?</span>.
+    </div>
+    <button class="check-btn" id="btn21" onclick="checkDrop21()">&#10003; Check my answers</button>
+    <div class="drag-result" id="res21"></div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div style="background:#007BA6;border-radius:8px;padding:28px 32px;margin-bottom:20px;">
+  <div style="font-size:16pt;font-weight:700;color:#ffffff;margin-bottom:16px;">&#10003; Summary — CIE 9618 Topic 20.1: Declarative Programming (Part 1)</div>
+  <div class="g2" style="gap:10px;">
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Declarative programming:</strong> you state <em>what</em> is true as facts and rules; the inference engine works out <em>how</em> to answer a goal.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Facts:</strong> always true. Lower-case predicate and constants, arguments in brackets, full stop: <code style="background:rgba(0,0,0,0.2);color:#fff;">type(lion, mammal).</code></div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Argument order:</strong> decide what each argument means and use the same order every time. Anything not stated is treated as false.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Rules:</strong> head IF body. True only when the conditions are true: <code style="background:rgba(0,0,0,0.2);color:#fff;">carnivore(X) IF eats(X, meat).</code></div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>Variables:</strong> start with a capital letter. The same variable in one rule stands for the same value, which lets conditions share information.</div>
+    <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:12px 16px;font-size:13pt;color:#fff;line-height:1.6;"><strong>AND, NOT, OR:</strong> AND joins conditions, NOT succeeds when a condition is not found, and two clauses with the same head act as OR.</div>
+  </div>
+</div>
+
+</div></div>
+<script>
+// ══════════════════════════════════════════════════
+//  WORKED EXAM QUESTIONS — reveal model answer
+// ══════════════════════════════════════════════════
+function toggleAns(n, btn) {
+  var a = document.getElementById('ans' + n);
+  var open = a.style.display === 'block';
+  a.style.display = open ? 'none' : 'block';
+  btn.innerHTML = open ? '&#128065; Show model answer' : '&#128065; Hide model answer';
+}
+
+// ══════════════════════════════════════════════════
+//  MCQ — pure JS, auto-submits on click
+// ══════════════════════════════════════════════════
+var mcqChosen = {};
+var MCQ_CORRECT = {"3": "b", "4": "a", "9": "a", "15": "b", "20": "a"};
+var MCQ_FB = {
+ "3": {
+  "ok": "&#10003; Correct! The programmer supplies the knowledge base; the inference engine does the searching and works out the answer.",
+  "a": "&#10007; Nothing is converted to Python. The inference engine <em>uses</em> the facts and rules to answer goals.",
+  "c": "&#10007; The facts stay in the order you wrote them. The engine searches through them, top to bottom.",
+  "d": "&#10007; The inference engine is not a spell checker. Its job is to satisfy goals using the knowledge base."
+ },
+ "4": {
+  "ok": "&#10003; Correct! Lower-case predicate and constants, the animal first and the place second, and a full stop at the end.",
+  "b": "&#10007; Predicates and constants must start with a lower-case letter. <code>Shark</code> and <code>Sea</code> would be read as variables.",
+  "c": "&#10007; Every clause must end with a full stop.",
+  "d": "&#10007; The predicate is <code>habitat(Animal, Place)</code>, so the animal comes first."
+ },
+ "9": {
+  "ok": "&#10003; Correct! Read the head, then \"if\", then the body: \"X is a bird if X's type is bird\".",
+  "b": "&#10007; The rule only applies to animals that satisfy the condition <code>type(X, bird)</code>.",
+  "c": "&#10007; <code>type</code> is the predicate in the condition, not the thing being described.",
+  "d": "&#10007; This reverses the rule. The head (before IF) is the conclusion; the body (after IF) is the condition."
+ },
+ "15": {
+  "ok": "&#10003; Correct! Every animal is checked; only the eagle and the bat have a canfly fact, so the other three are grounded.",
+  "a": "&#10007; These are the animals that <em>can</em> fly. NOT canfly(X) needs animals with no canfly fact.",
+  "c": "&#10007; The rule is not limited to birds. The lion and the shark also have no canfly fact.",
+  "d": "&#10007; The eagle and the bat have canfly facts, so NOT canfly(X) fails for them."
+ },
+ "20": {
+  "ok": "&#10003; Correct! S is the student, and C can be any club, so the rule succeeds if S attends at least one club.",
+  "b": "&#10007; The predicate is attends(Student, Club), so the student comes first.",
+  "c": "&#10007; Lower-case s is a constant, so this would only work for a student literally called \"s\". Use a capital S.",
+  "d": "&#10007; NOT reverses the meaning: this describes a student who attends no club."
+ }
+};
+function pickOpt(qNum, letter, el) {
+  if (mcqChosen[qNum] && mcqChosen[qNum].locked) return;
+  var box = el.parentNode;
+  box.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  mcqChosen[qNum] = { letter: letter, locked: false };
+  submitMCQ(qNum, letter);
+}
+
+function submitMCQ(qNum, letter) {
+  if (mcqChosen[qNum] && mcqChosen[qNum].locked) return;
+  var correct = MCQ_CORRECT[qNum];
+  var isOk = (letter === correct);
+  var box = document.getElementById('opts' + qNum);
+  var fb  = document.getElementById('fb' + qNum);
+  if (box) {
+    box.querySelectorAll('.opt').forEach(function(el) {
+      el.classList.add('locked');
+      var m = el.getAttribute('onclick').match(/pickOpt\(\d+,'([a-d])'/);
+      var v = m ? m[1] : '';
+      if (v === correct)           el.classList.add(isOk ? 'correct' : 'reveal');
+      else if (v === letter && !isOk) el.classList.add('wrong');
+    });
+  }
+  if (fb) {
+    fb.style.display = 'block';
+    var fd = MCQ_FB[qNum];
+    fb.className = 'fb ' + (isOk ? 'fb-ok' : 'fb-bad');
+    fb.innerHTML = isOk ? fd.ok : (fd[letter] || '&#10007; Not quite — the correct answer is highlighted in green above.');
+  }
+  if (mcqChosen[qNum]) mcqChosen[qNum].locked = true;
+}
+
+
+
+
+// ══════════════════════════════════════════════════
+//  WORD CHIPS
+// ══════════════════════════════════════════════════
+var woptChosen = {};
+var WOPT_CORRECT = {"5": "b", "10": "b"};
+var WOPT_FB = {
+ "5": {
+  "ok": "&#10003; Correct! The full stop marks the end of each clause.",
+  "a": "&#10007; A semicolon is not used to end clauses here. Use a <strong>full stop</strong>.",
+  "c": "&#10007; Commas separate arguments <em>inside</em> the brackets. A clause ends with a <strong>full stop</strong>.",
+  "d": "&#10007; Without an ending the clause is incomplete. Use a <strong>full stop</strong>."
+ },
+ "10": {
+  "ok": "&#10003; Correct! It starts with a capital letter, so X is a variable that can stand for any animal.",
+  "a": "&#10007; Constants start with a lower-case letter, like <code>meat</code>. X starts with a capital, so it is a <strong>variable</strong>.",
+  "c": "&#10007; The predicates here are <code>carnivore</code> and <code>eats</code>. X is a <strong>variable</strong>.",
+  "d": "&#10007; A goal is a question asked of the knowledge base. X is a <strong>variable</strong>."
+ }
+};
+function pickWopt(qNum, letter, el) {
+  if (woptChosen[qNum] && woptChosen[qNum].locked) return;
+  var container = el.parentNode;
+  container.querySelectorAll('.wopt').forEach(function(o){ o.classList.remove('selected'); });
+  el.classList.add('selected');
+  woptChosen[qNum] = { letter: letter, locked: false };
+  var correct = WOPT_CORRECT[qNum];
+  var isOk = (letter === correct);
+  container.querySelectorAll('.wopt').forEach(function(w) {
+    w.classList.add('locked');
+    var m = w.getAttribute('onclick').match(/pickWopt\(\d+,'([a-d])'/);
+    var v = m ? m[1] : '';
+    if (v === correct)           w.classList.add(isOk ? 'correct' : 'reveal');
+    else if (v === letter && !isOk) w.classList.add('wrong');
+  });
+  var fb = document.getElementById('fb' + qNum);
+  if (fb) {
+    fb.style.display = 'block';
+    var fd = WOPT_FB[qNum];
+    fb.className = 'fb ' + (isOk ? 'fb-ok' : 'fb-bad');
+    fb.innerHTML = isOk ? fd.ok : (fd[letter] || '&#10007; Not quite — the correct answer is highlighted above.');
+  }
+  woptChosen[qNum] = { letter: letter, locked: true };
+}
+
+
+// ══════════════════════════════════════════════════
+//  TRUE / FALSE
+// ══════════════════════════════════════════════════
+var TF_DATA = {
+ "1": {
+  "ok": "&#10003; Correct — False! Anything not stated is treated as false, so no fact is needed.",
+  "bad": "&#10007; This is False. If there is no canfly(lion) fact, the system already treats \"a lion can fly\" as false."
+ },
+ "2": {
+  "ok": "&#10003; True! They are line references, not part of the code.",
+  "bad": "&#10007; This is True. The numbers just label the clauses."
+ },
+ "3": {
+  "ok": "&#10003; Correct — False! Argument order carries meaning: the first says a lion eats meat; the second says meat eats a lion.",
+  "bad": "&#10007; This is False. The order of the arguments matters."
+ },
+ "4": {
+  "ok": "&#10003; True! One argument describes a property; two or more describe a relationship.",
+  "bad": "&#10007; This is True. Predicates can have any number of arguments, as long as you use them consistently."
+ },
+ "5": {
+  "ok": "&#10003; True! Head IF body: the conclusion comes first.",
+  "bad": "&#10007; This is True. The head is written first, then IF, then the conditions."
+ },
+ "6": {
+  "ok": "&#10003; Correct — False! Only names starting with a capital letter are variables. <code>x</code> is a constant.",
+  "bad": "&#10007; This is False. A lower-case x is a constant."
+ },
+ "7": {
+  "ok": "&#10003; Correct — False! <code>Animal</code> or <code>Food</code> are fine, as long as they start with a capital letter.",
+  "bad": "&#10007; This is False. Any name starting with a capital letter is a variable."
+ },
+ "8": {
+  "ok": "&#10003; True! The rule works out the answer from the existing facts.",
+  "bad": "&#10007; This is True. One rule covers every animal that meets its condition."
+ },
+ "9": {
+  "ok": "&#10003; True! The head is satisfied if either clause succeeds.",
+  "bad": "&#10007; This is True. Each clause is a separate way to make the head true."
+ },
+ "10": {
+  "ok": "&#10003; True! NOT succeeds when the condition cannot be found in the knowledge base.",
+  "bad": "&#10007; This is True. NOT succeeds when its condition fails."
+ },
+ "11": {
+  "ok": "&#10003; Correct — False! The same variable in a rule stands for the same value.",
+  "bad": "&#10007; This is False. Both X's must be the same animal."
+ },
+ "12": {
+  "ok": "&#10003; Correct — False! Conditions can be joined with AND as many times as needed.",
+  "bad": "&#10007; This is False. Use AND to add as many conditions as you need."
+ }
+};
+function doTF(n, userAns, correctAns) {
+  var row = document.getElementById('tf' + n);
+  if (!row || row.classList.contains('done')) return;
+  row.classList.add('done');
+  var isOk = (userAns === correctAns);
+  row.querySelectorAll('.tf-btn').forEach(function(b) {
+    var bT = b.textContent.trim() === 'True';
+    if (bT === userAns)             b.className = isOk ? 'tf-btn ok' : 'tf-btn bad';
+    if (!isOk && bT === correctAns) b.className = 'tf-btn show';
+  });
+  var fb = document.createElement('div');
+  fb.style.cssText = 'margin-top:8px;padding:10px 14px;border-radius:6px;font-size:13pt;line-height:1.6;font-family:Lato,sans-serif;';
+  fb.style.background = isOk ? '#e8f5e9' : '#ffebee';
+  fb.style.color      = isOk ? '#1b5e20' : '#7f0000';
+  fb.style.border     = isOk ? '1px solid #81c784' : '1px solid #ef9a9a';
+  fb.innerHTML = isOk ? TF_DATA[n].ok : TF_DATA[n].bad;
+  row.appendChild(fb);
+}
+
+
+// ══════════════════════════════════════════════════
+//  MATCH ACTIVITIES
+// ══════════════════════════════════════════════════
+function runMatch(matchId, btnId, resId, okMsg, badMsg) {
+  var rows = document.querySelectorAll('#' + matchId + ' .match-row');
+  var allOk = true;
+  rows.forEach(function(row) {
+    row.classList.remove('ok','bad');
+    var sel = row.querySelector('.match-sel');
+    if (sel.value === sel.getAttribute('data-ans')) row.classList.add('ok');
+    else { row.classList.add('bad'); allOk = false; }
+  });
+  var res = document.getElementById(resId);
+  res.style.display = 'block';
+  if (allOk) {
+    res.className = 'match-result fb fb-ok';
+    res.innerHTML = '&#10003; ' + okMsg;
+    document.getElementById(btnId).disabled = true;
+    rows.forEach(function(r){ r.querySelector('.match-sel').disabled = true; });
+  } else {
+    res.className = 'match-result fb fb-bad';
+    res.innerHTML = '&#10007; ' + badMsg;
+  }
+}
+
+
+
+function checkMatch1() {
+  runMatch('match1','match1-btn','match1-res',
+    "All correct! You will use all five of these words in exam answers.",
+    "One or more are wrong \u2014 check those in red. Hint: a fact has no conditions; a rule has IF.");
+}
+function checkMatch2() {
+  runMatch('match2','match2-btn','match2-res',
+    "All correct! These are exactly the slips that lose marks in \"write the facts\" questions.",
+    "One or more are wrong. Hint: check the capitals, the brackets, the order and the ending of each fact.");
+}
+function checkMatch3() {
+  runMatch('match3','match3-btn','match3-res',
+    "All correct! \"and\" becomes AND, \"cannot\" becomes NOT, and \"or\" becomes two separate clauses with the same head.",
+    "One or more are wrong. Hint: look for the words \"and\", \"cannot\" and \"or\" in each sentence.");
+}
+
+// ══════════════════════════════════════════════════
+//  DRAG & DROP ENGINE
+// ══════════════════════════════════════════════════
+var _drag = null;
+document.addEventListener('dragstart', function(e) {
+  var t = e.target;
+  if (t.classList.contains('drag-chip') && !t.classList.contains('locked')) {
+    _drag = t; e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', t.textContent);
+  }
+});
+document.addEventListener('dragover', function(e) {
+  var t = e.target;
+  while (t && t !== document.body) {
+    if (t.classList.contains('drop-zone') || t.classList.contains('drag-bank') || t.classList.contains('sort-zone')) {
+      e.preventDefault(); t.classList.add('drag-over'); return;
+    }
+    t = t.parentNode;
+  }
+});
+document.addEventListener('dragleave', function(e) {
+  var t = e.target; if (t && t.classList) t.classList.remove('drag-over');
+});
+document.addEventListener('drop', function(e) {
+  e.preventDefault(); if (!_drag) return;
+  var tgt = e.target;
+  while (tgt && tgt !== document.body) {
+    if (tgt.classList.contains('drop-zone') || tgt.classList.contains('drag-bank') || tgt.classList.contains('sort-zone')) break;
+    tgt = tgt.parentNode;
+  }
+  if (!tgt || tgt === document.body) return;
+  tgt.classList.remove('drag-over');
+  if (tgt.classList.contains('drop-zone')) {
+    var displaced = tgt.querySelector('.drag-chip');
+    if (displaced) {
+      var oid = displaced.getAttribute('data-origin') || '';
+      var ori = oid ? document.getElementById(oid) : _drag.parentNode;
+      if (ori) ori.appendChild(displaced);
+      displaced.removeAttribute('data-origin');
+    }
+    _drag.setAttribute('data-origin', _drag.parentNode.id || '');
+    _drag.parentNode.removeChild(_drag);
+    tgt.appendChild(_drag);
+  } else {
+    if (tgt === _drag.parentNode) { _drag = null; return; }
+    _drag.removeAttribute('data-origin');
+    _drag.parentNode.removeChild(_drag);
+    tgt.appendChild(_drag);
+  }
+  _drag = null;
+});
+
+function getDZ(id) { var z=document.getElementById(id); var c=z?z.querySelector('.drag-chip'):null; return c?c.textContent.trim():''; }
+function getSort(id) { var z=document.getElementById(id); if(!z)return[]; return Array.from(z.querySelectorAll('.drag-chip')).map(function(c){return c.textContent.trim();}); }
+
+// ══════════════════════════════════════════════════
+//  SLOT CHECKER — used by activities 7, 11, 16, 18, 22
+// ══════════════════════════════════════════════════
+var DONE = {};
+function lockChips(n, ids) {
+  document.querySelectorAll('#bank' + n + ' .drag-chip').forEach(function(c){ c.classList.add('locked'); });
+  ids.forEach(function(id){ var z=document.getElementById(id); if(z) z.querySelectorAll('.drag-chip').forEach(function(c){ c.classList.add('locked'); }); });
+}
+function checkSlots(n, ids, ans, okMsg, hints, emptyMsg) {
+  if (DONE[n]) return;
+  var vals = ids.map(getDZ);
+  var res = document.getElementById('res' + n);
+  res.style.display = 'block';
+  if (vals.some(function(v){ return v === ''; })) {
+    res.className = 'drag-result fb fb-bad';
+    res.innerHTML = '&#10007; ' + emptyMsg;
+    return;
+  }
+  var wrong = [];
+  vals.forEach(function(v, i){ if (v !== ans[i]) wrong.push(hints[i]); });
+  if (wrong.length === 0) {
+    DONE[n] = true;
+    document.getElementById('btn' + n).disabled = true;
+    lockChips(n, ids);
+    res.className = 'drag-result fb fb-ok';
+    res.innerHTML = '&#10003; ' + okMsg;
+  } else {
+    res.className = 'drag-result fb fb-bad';
+    res.innerHTML = '&#10007; Not quite. ' + wrong.slice(0, 2).join(' ') + (wrong.length > 2 ? ' (' + (wrong.length - 2) + ' more to fix.)' : '');
+  }
+}
+
+function checkCols(n, cols, names, total, okMsg, tip) {
+  if (DONE[n]) return;
+  var res = document.getElementById('res' + n);
+  res.style.display = 'block';
+  var count = 0, wrong = [];
+  Object.keys(cols).forEach(function(zone) {
+    getSort(zone).forEach(function(v) {
+      count++;
+      if (cols[zone].indexOf(v) === -1) {
+        var home = Object.keys(cols).filter(function(z){ return cols[z].indexOf(v) !== -1; })[0];
+        wrong.push('“' + v + '” belongs in <strong>' + names[home] + '</strong>.');
+      }
+    });
+  });
+  if (count < total) { res.className='drag-result fb fb-bad'; res.innerHTML='&#10007; Drag all ' + total + ' chips into a column before checking.'; return; }
+  if (wrong.length === 0) {
+    DONE[n] = true; document.getElementById('btn' + n).disabled = true;
+    Object.keys(cols).forEach(function(z){ document.querySelectorAll('#' + z + ' .drag-chip').forEach(function(c){ c.classList.add('locked'); }); });
+    res.className = 'drag-result fb fb-ok'; res.innerHTML = '&#10003; ' + okMsg;
+  } else {
+    res.className = 'drag-result fb fb-bad'; res.innerHTML = '&#10007; ' + wrong.slice(0, 2).join(' ') + ' ' + tip;
+  }
+}
+
+
+function checkSort1() {
+  checkCols(1, {"sort1-0": ["Uses loops and assignment statements", "Gives the computer step-by-step instructions", "The programmer controls the order of execution"], "sort1-1": ["States facts and rules about a problem", "The inference engine works out how to find the answer", "Answers are found by asking a goal"]},
+    {"sort1-0": "Imperative", "sort1-1": "Declarative"}, 6,
+    "All correct! Imperative code says <em>how</em>; declarative code says <em>what</em> is true and leaves the \"how\" to the inference engine.",
+    "Tip: if the statement is about steps, loops or order, it is imperative. If it is about facts, rules and goals, it is declarative.");
+}
+function checkDrop6() {
+  checkSlots(6, ["dz6a", "dz6b", "dz6c"],
+    ["animal(giraffe).", "type(giraffe, mammal).", "eats(giraffe, leaves)."],
+    "All correct! The giraffe cannot fly, so no canfly fact is written. Because there is no fact, any goal asking whether it can fly will fail.",
+    ["Clause 18: first record that it is an animal — <strong>animal(giraffe).</strong>", "Clause 19: type(Animal, Class), so the animal comes first — <strong>type(giraffe, mammal).</strong>", "Clause 20: predicates start with a lower-case letter — <strong>eats(giraffe, leaves).</strong>"],
+    "Drag a chip into every gap before checking.");
+}
+function checkDrop11() {
+  checkSlots(11, ["dz11a", "dz11b", "dz11c"],
+    ["insecteater(X)", "IF", "eats(X, insects)."],
+    "All correct! \"X is an insect eater if X eats insects.\" With this knowledge base, the bat satisfies the rule.",
+    ["Gap 1: the head needs a <strong>variable</strong>, written with a capital X.", "Gap 2: the head and body are joined by <strong>IF</strong>.", "Gap 3: eats(Animal, Food), so the animal X comes first — <strong>eats(X, insects).</strong>"],
+    "Drag a chip into every gap before checking.");
+}
+function checkDrop14() {
+  checkSlots(14, ["dz14a", "dz14b", "dz14c", "dz14d", "dz14e"],
+    ["grounded(X)", "IF", "animal(X)", "AND", "NOT canfly(X)."],
+    "All correct! Head, IF, first condition, AND, then the negated condition with a full stop.",
+    ["Gap 1: start with the head — <strong>grounded(X)</strong>.", "Gap 2: then <strong>IF</strong>.", "Gap 3: the first condition — <strong>animal(X)</strong>.", "Gap 4: \"and\" — <strong>AND</strong>.", "Gap 5: \"cannot fly\" — <strong>NOT canfly(X).</strong>"],
+    "Drag a chip into every gap before checking.");
+}
+function checkSort17() {
+  checkCols(17, {"sort17-0": ["Asha is a student", "Chess club meets on Monday", "Ben attends coding club"], "sort17-1": ["A student is busy on a day if they attend a club that meets on that day", "A student is a member if they attend any club"]},
+    {"sort17-0": "Fact", "sort17-1": "Rule"}, 5,
+    "All correct! Plain statements become facts. Statements containing \"if\" (a condition) become rules.",
+    "Tip: look for the word \"if\". A sentence with a condition is a rule.");
+}
+function checkDrop18() {
+  checkSlots(18, ["dz18a", "dz18b", "dz18c"],
+    ["meets(chess, monday).", "attends(asha, chess).", "attends(asha, coding)."],
+    "All correct! Each fact copies the predicate name and argument order already used in clauses 02, 04 and 06.",
+    ["Clause 03: clause 04 shows meets(Club, Day) — <strong>meets(chess, monday).</strong>", "Clause 05: a capital A would make Asha a variable — <strong>attends(asha, chess).</strong>", "Clause 07: the predicate is attends, not attend — <strong>attends(asha, coding).</strong>"],
+    "Drag a chip into every gap before checking.");
+}
+function checkDrop19() {
+  checkSlots(19, ["dz19a", "dz19b", "dz19c"],
+    ["attends(S, C)", "AND", "meets(C, D)."],
+    "All correct! The shared variable C links the two conditions: the club S attends must be the club that meets on day D.",
+    ["Gap 1: attends(Student, Club) — <strong>attends(S, C)</strong>.", "Gap 2: both conditions must be true — <strong>AND</strong>.", "Gap 3: meets(Club, Day), using the same C — <strong>meets(C, D).</strong>"],
+    "Drag a chip into every gap before checking.");
+}
+function checkDrop21() {
+  checkSlots(21, ["dz21a", "dz21b", "dz21c", "dz21d", "dz21e", "dz21f"],
+    ["fact", "rule", "lower case", "capital letter", "AND", "full stop"],
+    "All correct — you are ready for Part 2, where you will write goals that use these facts and rules!",
+    ["Gap 1: always true — <strong>fact</strong>.", "Gap 2: true if its conditions are true — <strong>rule</strong>.", "Gap 3: predicates and constants — <strong>lower case</strong>.", "Gap 4: variables — <strong>capital letter</strong>.", "Gap 5: joining conditions — <strong>AND</strong>.", "Gap 6: ending a clause — <strong>full stop</strong>."],
+    "Drag a word into every gap before checking.");
+}
+</script>
+</body>
+</html>
